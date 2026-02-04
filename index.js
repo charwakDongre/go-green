@@ -5,13 +5,7 @@ import random from "random";
 
 const path = "./data.json";
 
-const markCommit = (x, y) => {
-  const date = moment()
-    .subtract(1, "y") // Start exactly 1 year ago
-    .add(x, "w") // Add random weeks
-    .add(y, "d") // Add random days
-    .format();
-
+const markCommit = (date) => {
   const data = {
     date: date,
   };
@@ -23,21 +17,17 @@ const markCommit = (x, y) => {
 
 const makeCommits = (n) => {
   if (n === 0) return simpleGit().push();
-  const x = random.int(0, 54); // Random week within the past year
-  const y = random.int(0, 6); // Random day within the week
-  const date = moment()
-    .subtract(1, "y") // Start exactly 1 year ago
-    .add(x, "w") // Add random weeks
-    .add(y, "d") // Add random days
-    .format();
 
-  const data = {
-    date: date,
-  };
-  console.log(date);
-  jsonfile.writeFile(path, data, () => {
-    simpleGit().add([path]).commit(date, { "--date": date }, makeCommits.bind(this, --n));
-  });
+  // Generate a random date before February 4th of the current year
+  const startOfYear = moment().startOf("year"); // January 1st of the current year
+  const endDate = moment().year(moment().year()).month(1).date(4); // February 4th of the current year
+  const randomDate = moment(random.int(startOfYear.valueOf(), endDate.valueOf())).format();
+
+  console.log(randomDate);
+
+  markCommit(randomDate);
+
+  makeCommits(n - 1);
 };
 
 makeCommits(50);
